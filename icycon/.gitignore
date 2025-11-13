@@ -1,0 +1,10 @@
+.env
+
+
+
+# Virtual Environment
+venv/
+
+
+# Vercel
+.vercel/
