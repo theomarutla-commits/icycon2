@@ -164,3 +164,46 @@ If your React app needs to call the Django API during development, either:
 
 Security note: Do not enable permissive CORS in production.
 
+## Running Both Servers (Development)
+
+To run both the Django backend and React frontend development servers simultaneously for a full-stack development experience:
+
+### Terminal 1: Start Django backend
+
+```bash
+# From the repository root, activate the virtual environment if not already active
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Navigate to the Django app directory and run the server
+cd icycon
+python manage.py runserver
+```
+
+The Django backend will be available at: **http://127.0.0.1:8000**
+
+Admin panel: **http://127.0.0.1:8000/admin**
+
+### Terminal 2: Start React dev server (Vite)
+
+```bash
+# From the repository root (in a new terminal window)
+npm run dev
+```
+
+The React dev server will be available at: **http://127.0.0.1:3000**
+
+### Which URL to use?
+
+During development:
+- **For the React frontend with hot-reload**: http://127.0.0.1:3000
+- **For the built/production version served by Django**: http://127.0.0.1:8000 (after running `npm run build && python manage.py collectstatic --noinput`)
+
+The React dev server (port 3000) includes hot module replacement (HMR) so changes to your React code are reflected instantly in the browser.
+
+The Django server (port 8000) serves:
+- The built React SPA at `/` (when the frontend has been built)
+- Django REST API endpoints for your backend services
+- The admin interface at `/admin`
+
+````
+
