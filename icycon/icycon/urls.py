@@ -3,6 +3,7 @@ from django.urls import path, include
 from django.views.generic import TemplateView
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth import views as auth_views
+from .frontend_views import serve_react_frontend
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -15,7 +16,10 @@ urlpatterns = [
     path('tenants/', include('tenants.urls')),
     path('api/chat/', include('chatbot.urls')),
     # Simple server-rendered pages to replace the React frontend during development
-    path('', TemplateView.as_view(template_name='home.html'), name='home'),
+    # Serve React SPA from root (built into static/frontend/index.html). If
+    # the frontend hasn't been built yet this will fall back to the server-
+    # rendered `home.html` template.
+    path('', serve_react_frontend, name='home'),
     path('tenants-ui/', TemplateView.as_view(template_name='tenants.html'), name='tenants_ui'),
     path('signup/', TemplateView.as_view(template_name='signup.html'), name='signup'),
     # App overview pages (server-rendered)

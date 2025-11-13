@@ -112,3 +112,55 @@ python manage.py collectstatic --noinput
 
 - Note: Vercel's runtime is serverless — it does not run a persistent Gunicorn process. The `Procfile` and `runtime.txt` used by Heroku-style buildpacks are not required for a Vercel-only deployment.
 
+
+## Frontend (React + Vite) integration with Django
+
+This repository includes a React frontend (in `frontend/`) built with Vite. The recommended integration is to build the frontend into Django's static files and let Django serve the built SPA.
+
+Quick steps (build for production):
+
+1. Install Node dependencies at the project root (or in `frontend/` if you prefer):
+
+```bash
+# from repo root
+npm install
+```
+
+2. Build the frontend. The Vite config was updated to output into `static/frontend/`:
+
+```bash
+npm run build
+```
+
+3. Collect static files and run Django (or run server in development):
+
+```bash
+# collect static into STATIC_ROOT (for production)
+python manage.py collectstatic --noinput
+# run Django
+python manage.py runserver
+```
+
+Now visiting `/` will serve the built React `index.html` from `static/frontend/index.html`. If the frontend hasn't been built yet the app will fall back to the server-rendered `home.html` template so the site still functions.
+
+Development workflow (recommended):
+
+- Run the Django backend locally:
+
+```bash
+python manage.py runserver
+```
+
+- In a separate terminal run the Vite dev server for the React app (hot reload):
+
+```bash
+npm run dev
+```
+
+If your React app needs to call the Django API during development, either:
+
+- Enable CORS for the dev origin (e.g. http://localhost:3000) by setting `CORS_ALLOWED_ORIGINS` or enabling `CORS_ALLOW_ALL_ORIGINS` in `.env` while debugging; or
+- Configure Vite proxy rules to forward /api/* to the Django server.
+
+Security note: Do not enable permissive CORS in production.
+
