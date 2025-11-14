@@ -28,7 +28,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'id', 'username', 'first_name', 'last_name', 'email', 
             'full_name', 'organization_name', 'region', 'plan', 
             'brand_tone', 'organization_role', 'organization_created_at',
-            'organization_memberships', 'organization_members', 'is_staff'
+            'organization_memberships', 'organization_members', 'is_staff', 'avatar_url'
         ]
         read_only_fields = ['id', 'username', 'is_staff', 'organization_created_at']
 

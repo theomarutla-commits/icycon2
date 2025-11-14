@@ -10,6 +10,12 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 
 from analytics.models import Site as AnalyticsSite, KeywordCluster as AnalyticsKeywordCluster, ContentItem as AnalyticsContentItem, FAQ as AnalyticsFAQ, PageView
+from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
+from django.http import HttpResponse
+import csv
+from django.utils.dateparse import parse_datetime, parse_date
+from django.utils import timezone
 from aso.models import App as ASOApp, AppKeyword, AppListing
 from marketplace.models import (
     Product, Review, Order, SavedProduct,
@@ -18,6 +24,7 @@ from marketplace.models import (
 )
 from tenants.models import Tenant, TenantUser
 from seo.models import Site as SEOSite, KeywordCluster as SEOKeywordCluster, ContentItem as SEOContentItem, FAQ as SEOFAQ
+from analytics.models import ContentItem
 from social_media.models import (
     SocialAccount, Post, Comment, Engagement,
     Conversation as SocialConversation,
@@ -859,6 +866,78 @@ class AnalyticsPageViewsViewSet(viewsets.ModelViewSet):
             "referrer": pv.referrer or "Direct",
             "timestamp": pv.timestamp.isoformat() if pv.timestamp else None,
         } for pv in pageviews])
+
+
+class ExportAnalyticsView(GenericAPIView):
+    """Export analytics data as CSV or JSON.
+    POST /api/analytics/export/
+    Payload: { start_date?: 'YYYY-MM-DD' | ISO, end_date?: 'YYYY-MM-DD' | ISO, format?: 'csv'|'json' }
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        tenants = get_user_tenants(user)
+
+        start = request.data.get('start_date')
+        end = request.data.get('end_date')
+        fmt = (request.data.get('format') or 'csv').lower()
+
+        qs = PageView.objects.filter(site__tenant__in=tenants)
+
+        # Parse dates if provided
+        if start:
+            try:
+                parsed = parse_datetime(start) or parse_date(start)
+                if isinstance(parsed, timezone.datetime):
+                    qs = qs.filter(timestamp__gte=parsed)
+                else:
+                    qs = qs.filter(timestamp__date__gte=parsed)
+            except Exception:
+                pass
+        if end:
+            try:
+                parsed = parse_datetime(end) or parse_date(end)
+                if isinstance(parsed, timezone.datetime):
+                    qs = qs.filter(timestamp__lte=parsed)
+                else:
+                    qs = qs.filter(timestamp__date__lte=parsed)
+            except Exception:
+                pass
+
+        qs = qs.order_by('-timestamp')[:10000]
+
+        if fmt == 'json':
+            data = [{
+                'id': pv.id,
+                'site_domain': pv.site.domain,
+                'url': pv.url,
+                'visitor_id': pv.visitor_id,
+                'duration': pv.duration,
+                'bounce': pv.bounce,
+                'referrer': pv.referrer,
+                'timestamp': pv.timestamp.isoformat() if pv.timestamp else None,
+            } for pv in qs]
+            return Response(data)
+
+        # Default to CSV
+        # Create CSV response
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="analytics-export.csv"'
+        writer = csv.writer(response)
+        writer.writerow(['id', 'site_domain', 'url', 'visitor_id', 'duration', 'bounce', 'referrer', 'timestamp'])
+        for pv in qs:
+            writer.writerow([
+                pv.id,
+                pv.site.domain,
+                pv.url,
+                pv.visitor_id,
+                pv.duration,
+                pv.bounce,
+                pv.referrer or '',
+                pv.timestamp.isoformat() if pv.timestamp else '',
+            ])
+        return response
 
 
 # ============================================================================

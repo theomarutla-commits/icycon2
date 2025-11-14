@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api/auth';
+import CreateSiteModal from './seo/CreateSiteModal';
+import SiteAnalytics from './seo/SiteAnalytics';
 
 const SEOPage: React.FC = () => {
   const [sites, setSites] = useState<any[]>([]);
@@ -7,32 +9,44 @@ const SEOPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('sites');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedSiteForAnalytics, setSelectedSiteForAnalytics] = useState<number | null>(null);
+
+  const fetchSEOData = async () => {
+    try {
+      setLoading(true);
+      const sitesData = await api.getSEOSites();
+      const keywordsData = await api.getSEOKeywords();
+      
+      setSites(Array.isArray(sitesData) ? sitesData : sitesData.results || []);
+      setKeywords(Array.isArray(keywordsData) ? keywordsData : keywordsData.results || []);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load SEO data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchSEOData = async () => {
-      try {
-        setLoading(true);
-        const sitesData = await api.getSEOSites();
-        const keywordsData = await api.getSEOKeywords();
-        
-        setSites(Array.isArray(sitesData) ? sitesData : sitesData.results || []);
-        setKeywords(Array.isArray(keywordsData) ? keywordsData : keywordsData.results || []);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load SEO data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchSEOData();
   }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-900 to-orange-900 p-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-white mb-2">SEO Optimization</h1>
-        <p className="text-amber-200 mb-8">Monitor and improve your website's search engine optimization.</p>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">SEO Optimization</h1>
+            <p className="text-amber-200">Monitor and improve your website's search engine optimization.</p>
+          </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="bg-white text-amber-900 px-6 py-2 rounded-lg font-semibold hover:bg-amber-100 transition"
+          >
+            + Add Site
+          </button>
+        </div>
 
         {loading && <div className="text-white">Loading SEO data...</div>}
         {error && <div className="bg-red-500 text-white p-4 rounded">{error}</div>}
@@ -92,9 +106,17 @@ const SEOPage: React.FC = () => {
                   </div>
                 </div>
 
-                <button className="w-full bg-amber-600 text-white py-2 rounded hover:bg-amber-700 transition">
-                  View Analytics
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setSelectedSiteForAnalytics(site.id)}
+                    className="flex-1 bg-amber-600 text-white py-2 rounded hover:bg-amber-700 transition font-semibold"
+                  >
+                    View Analytics
+                  </button>
+                  <button className="flex-1 bg-gray-600 text-white py-2 rounded hover:bg-gray-700 transition font-semibold">
+                    Manage
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -140,15 +162,34 @@ const SEOPage: React.FC = () => {
           </div>
         )}
 
-        {((activeTab === 'sites' && sites.length === 0) || 
-          (activeTab === 'keywords' && keywords.length === 0)) && !loading && (
+        {sites.length === 0 && !loading && (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <p className="text-gray-600 text-lg">
-              No {activeTab} found.
+              No sites found. Create one to get started!
             </p>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="mt-4 bg-amber-600 text-white px-6 py-2 rounded hover:bg-amber-700 transition"
+            >
+              + Create Your First Site
+            </button>
           </div>
         )}
       </div>
+
+      {/* Modals */}
+      <CreateSiteModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSuccess={fetchSEOData}
+      />
+
+      {selectedSiteForAnalytics && (
+        <SiteAnalytics
+          siteId={selectedSiteForAnalytics}
+          onClose={() => setSelectedSiteForAnalytics(null)}
+        />
+      )}
     </div>
   );
 };

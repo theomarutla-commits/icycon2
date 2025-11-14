@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api/auth';
+import CreateSocialPostModal from './social/CreateSocialPostModal';
+import EditSocialPostModal from './social/EditSocialPostModal';
 
 const SocialPage: React.FC = () => {
   const [accounts, setAccounts] = useState<any[]>([]);
@@ -10,40 +12,55 @@ const SocialPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('accounts');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<any>(null);
+
+  const fetchSocialData = async () => {
+    try {
+      setLoading(true);
+      const [accountsData, postsData, commentsData, engagementsData, messagesData] = await Promise.all([
+        api.getSocialAccounts(),
+        api.getSocialPosts(),
+        api.getSocialComments(),
+        api.getSocialEngagements(),
+        api.getSocialMessages(),
+      ]);
+
+      setAccounts(Array.isArray(accountsData) ? accountsData : accountsData.results || []);
+      setPosts(Array.isArray(postsData) ? postsData : postsData.results || []);
+      setComments(Array.isArray(commentsData) ? commentsData : commentsData.results || []);
+      setEngagements(Array.isArray(engagementsData) ? engagementsData : engagementsData.results || []);
+      setMessagesList(Array.isArray(messagesData) ? messagesData : messagesData.results || []);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load social data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchSocialData = async () => {
-      try {
-        setLoading(true);
-        const [accountsData, postsData, commentsData, engagementsData, messagesData] = await Promise.all([
-          api.getSocialAccounts(),
-          api.getSocialPosts(),
-          api.getSocialComments(),
-          api.getSocialEngagements(),
-          api.getSocialMessages(),
-        ]);
-
-        setAccounts(Array.isArray(accountsData) ? accountsData : accountsData.results || []);
-        setPosts(Array.isArray(postsData) ? postsData : postsData.results || []);
-        setComments(Array.isArray(commentsData) ? commentsData : commentsData.results || []);
-        setEngagements(Array.isArray(engagementsData) ? engagementsData : engagementsData.results || []);
-        setMessagesList(Array.isArray(messagesData) ? messagesData : messagesData.results || []);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load social data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchSocialData();
   }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-900 to-red-900 p-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-white mb-2">Social Media</h1>
-        <p className="text-pink-200 mb-8">Manage and monitor your social media accounts and posts.</p>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">Social Media</h1>
+            <p className="text-pink-200">Manage and monitor your social media accounts and posts.</p>
+          </div>
+          {activeTab === 'posts' && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-white text-pink-900 px-6 py-3 rounded-lg font-bold hover:bg-pink-50 transition shadow-lg"
+            >
+              + New Post
+            </button>
+          )}
+        </div>
 
         {loading && <div className="text-white">Loading social media data...</div>}
         {error && <div className="bg-red-500 text-white p-4 rounded">{error}</div>}
@@ -123,7 +140,7 @@ const SocialPage: React.FC = () => {
 
                 <p className="text-gray-800 mb-4">{post.content}</p>
 
-                <div className="flex gap-6 pt-4 border-t">
+                <div className="flex gap-6 pt-4 border-t mb-4">
                   <div>
                     <p className="text-gray-600 text-sm">Likes</p>
                     <p className="font-bold">{post.like_count || 0}</p>
@@ -137,8 +154,38 @@ const SocialPage: React.FC = () => {
                     <p className="font-bold">{post.share_count || 0}</p>
                   </div>
                 </div>
+
+                <div className="flex gap-3">
+                  <button className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition text-sm">
+                    View
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedPost(post);
+                      setShowEditModal(true);
+                    }}
+                    className="flex-1 bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition text-sm"
+                  >
+                    Edit
+                  </button>
+                  <button className="flex-1 bg-red-600 text-white py-2 rounded hover:bg-red-700 transition text-sm">
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
+
+            {posts.length === 0 && !loading && (
+              <div className="bg-white rounded-lg shadow p-8 text-center">
+                <p className="text-gray-600 text-lg mb-4">No posts found.</p>
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="bg-pink-600 text-white px-6 py-2 rounded hover:bg-pink-700 transition"
+                >
+                  + Create Your First Post
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -200,6 +247,22 @@ const SocialPage: React.FC = () => {
             ))}
           </div>
         )}
+
+        {/* Modals */}
+        <CreateSocialPostModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onSuccess={fetchSocialData}
+        />
+        <EditSocialPostModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedPost(null);
+          }}
+          onSuccess={fetchSocialData}
+          post={selectedPost}
+        />
       </div>
     </div>
   );

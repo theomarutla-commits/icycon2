@@ -104,6 +104,31 @@ class UserProfileViewSet(viewsets.ModelViewSet):
             'message': 'Activity tracking will be implemented in future release.'
         })
 
+    @action(detail=True, methods=['post'], url_path='avatar')
+    def avatar(self, request):
+        """Upload avatar image and set user's avatar_url."""
+        user = self.get_object()
+        if 'avatar' not in request.FILES:
+            return Response({'error': 'No file uploaded'}, status=status.HTTP_400_BAD_REQUEST)
+        avatar_file = request.FILES['avatar']
+        from django.core.files.storage import default_storage
+        from django.utils import timezone
+        # Build a simple path under media/avatars/{user_id}_{timestamp}_{filename}
+        timestamp = timezone.now().strftime('%Y%m%d%H%M%S')
+        filename = f'avatars/user_{user.id}_{timestamp}_{avatar_file.name}'
+        saved_path = default_storage.save(filename, avatar_file)
+        # Construct public URL (depends on storage backend)
+        try:
+            url = default_storage.url(saved_path)
+        except Exception:
+            # Fallback to MEDIA_URL
+            from django.conf import settings
+            url = f"{getattr(settings, 'MEDIA_URL', '/media/')}{saved_path}"
+
+        user.avatar_url = url
+        user.save()
+        return Response({'avatar_url': url})
+
 
 class OrganizationMembershipViewSet(viewsets.ModelViewSet):
     """Manage organization memberships via API."""

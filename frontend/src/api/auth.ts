@@ -1,5 +1,5 @@
 // Real API functions connecting to Django backend
-const API_BASE = 'http://127.0.0.1:8000';
+import { API_BASE, apiRequest, getAuthHeaders } from '../config/api';
 
 export const api = {
   login: async (email: string, password: string) => {
@@ -11,6 +11,7 @@ export const api = {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
+        credentials: 'include', // Include cookies for CSRF
       });
 
       if (!response.ok) {
@@ -39,6 +40,7 @@ export const api = {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, username, password, password_confirm }),
+        credentials: 'include', // Include cookies for CSRF
       });
 
       if (!response.ok) {
@@ -63,10 +65,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/dashboard/`, {
-      headers: {
-        'Authorization': `Token ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch dashboard');
     return response.json();
@@ -76,10 +76,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/aso/apps/`, {
-      headers: {
-        'Authorization': `Token ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch ASO apps');
     return response.json();
@@ -89,10 +87,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/marketplace/products/`, {
-      headers: {
-        'Authorization': `Token ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch products');
     return response.json();
@@ -102,10 +98,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/analytics/sites/`, {
-      headers: {
-        'Authorization': `Token ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch sites');
     return response.json();
@@ -115,10 +109,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/multilingual/summary/`, {
-      headers: {
-        'Authorization': `Token ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch multilingual summary');
     return response.json();
@@ -128,10 +120,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/tenants/summary/`, {
-      headers: {
-        'Authorization': `Token ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch tenants');
     return response.json();
@@ -141,10 +131,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/social/accounts/`, {
-      headers: {
-        'Authorization': `Token ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch social accounts');
     return response.json();
@@ -154,10 +142,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/social/posts/`, {
-      headers: {
-        'Authorization': `Token ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch social posts');
     return response.json();
@@ -167,10 +153,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/email/lists/`, {
-      headers: {
-        'Authorization': `Token ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch email lists');
     return response.json();
@@ -180,10 +164,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/email/templates/`, {
-      headers: {
-        'Authorization': `Token ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch email templates');
     return response.json();
@@ -193,7 +175,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/marketplace/reviews/`, {
-      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch marketplace reviews');
     return response.json();
@@ -203,7 +186,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/marketplace/orders/`, {
-      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch marketplace orders');
     return response.json();
@@ -213,7 +197,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/marketplace/saved/`, {
-      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch saved products');
     return response.json();
@@ -223,7 +208,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/marketplace/conversations/`, {
-      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch marketplace conversations');
     return response.json();
@@ -233,7 +219,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/marketplace/messages/`, {
-      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch marketplace messages');
     return response.json();
@@ -243,17 +230,45 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/analytics/pageviews/`, {
-      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch pageviews');
     return response.json();
+  },
+
+  // Export analytics (CSV/JSON) given optional start/end dates
+  exportAnalytics: async (data: { start_date?: string; end_date?: string; format?: string }) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/api/analytics/export/`, {
+      method: 'POST',
+      headers: getAuthHeaders(token),
+      body: JSON.stringify(data),
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const txt = await response.text().catch(() => null);
+      throw new Error(txt || 'Failed to export analytics');
+    }
+
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      return response.json();
+    }
+
+    // Fallback to blob (csv, zip, etc.)
+    const blob = await response.blob();
+    return blob;
   },
 
   getASOKeywords: async () => {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/aso/keywords/`, {
-      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch ASO keywords');
     return response.json();
@@ -263,7 +278,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/aso/listings/`, {
-      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch ASO listings');
     return response.json();
@@ -273,7 +289,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/social/comments/`, {
-      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch social comments');
     return response.json();
@@ -283,7 +300,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/social/engagement/`, {
-      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch social engagements');
     return response.json();
@@ -293,7 +311,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/social/messages/`, {
-      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch social messages');
     return response.json();
@@ -303,7 +322,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/email/contacts/`, {
-      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch email contacts');
     return response.json();
@@ -313,7 +333,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/email/sends/`, {
-      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch email sends');
     return response.json();
@@ -323,7 +344,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/tenants/integrations/`, {
-      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch tenant integrations');
     return response.json();
@@ -333,10 +355,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/seo/sites/`, {
-      headers: {
-        'Authorization': `Token ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch SEO sites');
     return response.json();
@@ -346,10 +366,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/seo/keywords/`, {
-      headers: {
-        'Authorization': `Token ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch SEO keywords');
     return response.json();
@@ -359,10 +377,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/seo/content/`, {
-      headers: {
-        'Authorization': `Token ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch SEO content');
     return response.json();
@@ -374,11 +390,9 @@ export const api = {
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/seo/sites/`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Token ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(token),
       body: JSON.stringify(data),
+      credentials: 'include',
     });
     if (!response.ok) {
       const err = await response.text();
@@ -391,10 +405,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/seo/sites/${id}/`, {
-      headers: {
-        'Authorization': `Token ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch SEO site');
     return response.json();
@@ -405,11 +417,9 @@ export const api = {
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/seo/sites/${id}/`, {
       method: 'PATCH',
-      headers: {
-        'Authorization': `Token ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(token),
       body: JSON.stringify(data),
+      credentials: 'include',
     });
     if (!response.ok) {
       const err = await response.text();
@@ -423,10 +433,8 @@ export const api = {
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/api/seo/sites/${id}/`, {
       method: 'DELETE',
-      headers: {
-        'Authorization': `Token ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (response.status !== 204 && !response.ok) {
       const err = await response.text();
@@ -439,7 +447,8 @@ export const api = {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/users/api/profile/`, {
-      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(token),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch profile');
     return response.json();
@@ -450,11 +459,236 @@ export const api = {
     if (!token) throw new Error('Not authenticated');
     const response = await fetch(`${API_BASE}/users/api/profile/`, {
       method: 'PATCH',
-      headers: { 'Authorization': `Token ${token}`, 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(token),
       body: JSON.stringify(data),
+      credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to update profile');
     return response.json();
+  },
+
+  // Upload profile avatar. Accepts a File object and returns an object with avatar_url
+  uploadProfileAvatar: async (file: File) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const form = new FormData();
+    form.append('avatar', file);
+
+    const response = await fetch(`${API_BASE}/users/api/profile/avatar/`, {
+      method: 'POST',
+      // Note: Do not set Content-Type for FormData; browser will add boundary
+      headers: getAuthHeaders(token),
+      body: form,
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const txt = await response.text().catch(() => null);
+      throw new Error(txt || 'Failed to upload avatar');
+    }
+
+    return response.json();
+  },
+
+  changeEmail: async (newEmail: string, password: string) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/users/api/change-email/`, {
+      method: 'POST',
+      headers: getAuthHeaders(token),
+      body: JSON.stringify({ new_email: newEmail, password }),
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => null);
+      throw new Error(err?.detail || 'Failed to change email');
+    }
+    return response.json();
+  },
+
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/users/api/change-password/`, {
+      method: 'POST',
+      headers: getAuthHeaders(token),
+      body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => null);
+      throw new Error(err?.detail || 'Failed to change password');
+    }
+    return response.json();
+  },
+
+  // ASO Operations
+  createASOApp: async (data: any) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/api/aso/apps/`, {
+      method: 'POST',
+      headers: getAuthHeaders(token),
+      body: JSON.stringify(data),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to create app');
+    return response.json();
+  },
+
+  updateASOApp: async (id: number, data: any) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/api/aso/apps/${id}/`, {
+      method: 'PUT',
+      headers: getAuthHeaders(token),
+      body: JSON.stringify(data),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to update app');
+    return response.json();
+  },
+
+  deleteASOApp: async (id: number) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/api/aso/apps/${id}/`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(token),
+      credentials: 'include',
+    });
+    if (response.status !== 204 && !response.ok) throw new Error('Failed to delete app');
+    return true;
+  },
+
+  // Email Operations
+  createEmailTemplate: async (data: any) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/api/email/templates/`, {
+      method: 'POST',
+      headers: getAuthHeaders(token),
+      body: JSON.stringify(data),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to create template');
+    return response.json();
+  },
+
+  updateEmailTemplate: async (id: number, data: any) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/api/email/templates/${id}/`, {
+      method: 'PUT',
+      headers: getAuthHeaders(token),
+      body: JSON.stringify(data),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to update template');
+    return response.json();
+  },
+
+  deleteEmailTemplate: async (id: number) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/api/email/templates/${id}/`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(token),
+      credentials: 'include',
+    });
+    if (response.status !== 204 && !response.ok) throw new Error('Failed to delete template');
+    return true;
+  },
+
+  createEmailList: async (data: any) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/api/email/lists/`, {
+      method: 'POST',
+      headers: getAuthHeaders(token),
+      body: JSON.stringify(data),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to create list');
+    return response.json();
+  },
+
+  // Marketplace Operations
+  createMarketplaceProduct: async (data: any) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/api/marketplace/products/`, {
+      method: 'POST',
+      headers: getAuthHeaders(token),
+      body: JSON.stringify(data),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to create product');
+    return response.json();
+  },
+
+  updateMarketplaceProduct: async (id: number, data: any) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/api/marketplace/products/${id}/`, {
+      method: 'PUT',
+      headers: getAuthHeaders(token),
+      body: JSON.stringify(data),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to update product');
+    return response.json();
+  },
+
+  deleteMarketplaceProduct: async (id: number) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/api/marketplace/products/${id}/`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(token),
+      credentials: 'include',
+    });
+    if (response.status !== 204 && !response.ok) throw new Error('Failed to delete product');
+    return true;
+  },
+
+  // Social Media Operations
+  createSocialPost: async (data: any) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/api/social/posts/`, {
+      method: 'POST',
+      headers: getAuthHeaders(token),
+      body: JSON.stringify(data),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to create post');
+    return response.json();
+  },
+
+  updateSocialPost: async (id: number, data: any) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/api/social/posts/${id}/`, {
+      method: 'PUT',
+      headers: getAuthHeaders(token),
+      body: JSON.stringify(data),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to update post');
+    return response.json();
+  },
+
+  deleteSocialPost: async (id: number) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/api/social/posts/${id}/`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(token),
+      credentials: 'include',
+    });
+    if (response.status !== 204 && !response.ok) throw new Error('Failed to delete post');
+    return true;
   },
 
   logout: () => {
@@ -462,3 +696,4 @@ export const api = {
     localStorage.removeItem('user');
   },
 };
+

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api/auth';
+import ExportAnalyticsModal from './analytics/ExportAnalyticsModal';
 
 const AnalyticsPage: React.FC = () => {
   const [sites, setSites] = useState<any[]>([]);
@@ -7,6 +8,7 @@ const AnalyticsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'sites'|'pageviews'>('sites');
+  const [showExportModal, setShowExportModal] = useState(false);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -38,12 +40,18 @@ const AnalyticsPage: React.FC = () => {
         {loading && <div className="text-white">Loading analytics...</div>}
         {error && <div className="bg-red-500 text-white p-4 rounded">{error}</div>}
 
-        <div className="flex gap-3 mb-6">
-          {['sites','pageviews'].map((t) => (
-            <button key={t} onClick={() => setActiveTab(t as any)} className={`px-4 py-2 rounded font-semibold ${activeTab === t ? 'bg-white text-blue-900' : 'bg-blue-700 text-white hover:bg-blue-600'}`}>
-              {t.charAt(0).toUpperCase() + t.slice(1)}
-            </button>
-          ))}
+        <div className="flex justify-between items-center gap-3 mb-6">
+          <div className="flex gap-3">
+            {['sites','pageviews'].map((t) => (
+              <button key={t} onClick={() => setActiveTab(t as any)} className={`px-4 py-2 rounded font-semibold ${activeTab === t ? 'bg-white text-blue-900' : 'bg-blue-700 text-white hover:bg-blue-600'}`}>
+                {t.charAt(0).toUpperCase() + t.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          <div>
+            <button onClick={() => setShowExportModal(true)} className="px-4 py-2 rounded bg-white text-green-700 font-semibold hover:bg-green-50">Export</button>
+          </div>
         </div>
 
         {activeTab === 'sites' && (
@@ -71,6 +79,7 @@ const AnalyticsPage: React.FC = () => {
                   </div>
 
                   <div>
+                  <ExportAnalyticsModal isOpen={showExportModal} onClose={() => setShowExportModal(false)} onSuccess={() => { /* refresh if needed */ }} />
                     <p className="text-gray-600 text-sm">Rank</p>
                     <p className="text-2xl font-bold text-orange-600">{site.rank || 'N/A'}</p>
                   </div>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api/auth';
+import CreateAppModal from './aso/CreateAppModal';
 
 const ASOPage: React.FC = () => {
   const [apps, setApps] = useState<any[]>([]);
@@ -8,35 +9,46 @@ const ASOPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'apps'|'keywords'|'listings'>('apps');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  const fetchAll = async () => {
+    try {
+      setLoading(true);
+      const [appsData, keywordsData, listingsData] = await Promise.all([
+        api.getASOApps(),
+        api.getASOKeywords(),
+        api.getASOListings(),
+      ]);
+      setApps(Array.isArray(appsData) ? appsData : appsData.results || []);
+      setKeywords(Array.isArray(keywordsData) ? keywordsData : keywordsData.results || []);
+      setListings(Array.isArray(listingsData) ? listingsData : listingsData.results || []);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load ASO data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchAll = async () => {
-      try {
-        setLoading(true);
-        const [appsData, keywordsData, listingsData] = await Promise.all([
-          api.getASOApps(),
-          api.getASOKeywords(),
-          api.getASOListings(),
-        ]);
-        setApps(Array.isArray(appsData) ? appsData : appsData.results || []);
-        setKeywords(Array.isArray(keywordsData) ? keywordsData : keywordsData.results || []);
-        setListings(Array.isArray(listingsData) ? listingsData : listingsData.results || []);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load ASO data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchAll();
   }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 to-purple-900 p-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-white mb-2">App Store Optimization</h1>
-        <p className="text-blue-200 mb-8">Track and optimize your mobile apps across iOS and Android platforms.</p>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">App Store Optimization</h1>
+            <p className="text-blue-200">Track and optimize your mobile apps across iOS and Android platforms.</p>
+          </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="bg-white text-blue-900 px-6 py-2 rounded-lg font-semibold hover:bg-blue-100 transition"
+          >
+            + Add App
+          </button>
+        </div>
 
         {loading && <div className="text-white">Loading ASO data...</div>}
         {error && <div className="bg-red-500 text-white p-4 rounded">{error}</div>}
@@ -75,9 +87,14 @@ const ASOPage: React.FC = () => {
                       <span className="font-semibold">{app.keywords_count || 0}</span>
                     </div>
                   </div>
-                  <button className="w-full mt-4 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
-                    View Details
-                  </button>
+                  <div className="flex gap-2 mt-4">
+                    <button className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
+                      View Details
+                    </button>
+                    <button className="flex-1 bg-gray-600 text-white py-2 rounded hover:bg-gray-700 transition">
+                      Edit
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -115,9 +132,21 @@ const ASOPage: React.FC = () => {
         {apps.length === 0 && !loading && (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <p className="text-gray-600 text-lg">No apps found. Create one to get started!</p>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="mt-4 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
+            >
+              + Add Your First App
+            </button>
           </div>
         )}
       </div>
+
+      <CreateAppModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSuccess={fetchAll}
+      />
     </div>
   );
 };

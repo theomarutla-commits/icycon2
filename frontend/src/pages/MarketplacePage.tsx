@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api/auth';
+import CreateMarketplaceProductModal from './marketplace/CreateMarketplaceProductModal';
+import EditMarketplaceProductModal from './marketplace/EditMarketplaceProductModal';
 
 const MarketplacePage: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -11,42 +13,57 @@ const MarketplacePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'products'|'reviews'|'orders'|'saved'|'conversations'|'messages'>('products');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+
+  const fetchAll = async () => {
+    try {
+      setLoading(true);
+      const [productsData, reviewsData, ordersData, savedData, convosData, messagesData] = await Promise.all([
+        api.getMarketplaceProducts(),
+        api.getMarketplaceReviews(),
+        api.getMarketplaceOrders(),
+        api.getMarketplaceSaved(),
+        api.getMarketplaceConversations(),
+        api.getMarketplaceMessages(),
+      ]);
+
+      setProducts(Array.isArray(productsData) ? productsData : productsData.results || []);
+      setReviews(Array.isArray(reviewsData) ? reviewsData : reviewsData.results || []);
+      setOrders(Array.isArray(ordersData) ? ordersData : ordersData.results || []);
+      setSaved(Array.isArray(savedData) ? savedData : savedData.results || []);
+      setConversations(Array.isArray(convosData) ? convosData : convosData.results || []);
+      setMessages(Array.isArray(messagesData) ? messagesData : messagesData.results || []);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load marketplace data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchAll = async () => {
-      try {
-        setLoading(true);
-        const [productsData, reviewsData, ordersData, savedData, convosData, messagesData] = await Promise.all([
-          api.getMarketplaceProducts(),
-          api.getMarketplaceReviews(),
-          api.getMarketplaceOrders(),
-          api.getMarketplaceSaved(),
-          api.getMarketplaceConversations(),
-          api.getMarketplaceMessages(),
-        ]);
-
-        setProducts(Array.isArray(productsData) ? productsData : productsData.results || []);
-        setReviews(Array.isArray(reviewsData) ? reviewsData : reviewsData.results || []);
-        setOrders(Array.isArray(ordersData) ? ordersData : ordersData.results || []);
-        setSaved(Array.isArray(savedData) ? savedData : savedData.results || []);
-        setConversations(Array.isArray(convosData) ? convosData : convosData.results || []);
-        setMessages(Array.isArray(messagesData) ? messagesData : messagesData.results || []);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load marketplace data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchAll();
   }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 to-purple-900 p-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-white mb-2">Marketplace</h1>
-        <p className="text-blue-200 mb-8">Browse and manage digital products and services.</p>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">Marketplace</h1>
+            <p className="text-blue-200">Browse and manage digital products and services.</p>
+          </div>
+          {activeTab === 'products' && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-white text-blue-900 px-6 py-3 rounded-lg font-bold hover:bg-blue-50 transition shadow-lg"
+            >
+              + Add Product
+            </button>
+          )}
+        </div>
 
         {loading && <div className="text-white">Loading marketplace data...</div>}
         {error && <div className="bg-red-500 text-white p-4 rounded">{error}</div>}
@@ -83,12 +100,38 @@ const MarketplacePage: React.FC = () => {
                     </p>
                     <p className="text-sm text-gray-600">{product.pricing_type}</p>
                   </div>
-                  <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
-                    View Product
-                  </button>
+                  <div className="flex gap-2">
+                    <button className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
+                      View
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedProduct(product);
+                        setShowEditModal(true);
+                      }}
+                      className="flex-1 bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
+                    >
+                      Edit
+                    </button>
+                    <button className="flex-1 bg-red-600 text-white py-2 rounded hover:bg-red-700 transition">
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
+
+            {products.length === 0 && !loading && (
+              <div className="col-span-full bg-white rounded-lg shadow p-8 text-center">
+                <p className="text-gray-600 text-lg mb-4">No products found.</p>
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
+                >
+                  + Create Your First Product
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -171,11 +214,21 @@ const MarketplacePage: React.FC = () => {
           </div>
         )}
 
-        {products.length === 0 && !loading && (
-          <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-600 text-lg">No products found.</p>
-          </div>
-        )}
+        {/* Modals */}
+        <CreateMarketplaceProductModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onSuccess={fetchAll}
+        />
+        <EditMarketplaceProductModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedProduct(null);
+          }}
+          onSuccess={fetchAll}
+          product={selectedProduct}
+        />
       </div>
     </div>
   );

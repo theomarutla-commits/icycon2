@@ -17,6 +17,7 @@ from .api_views import (
     MarketplaceMessagesViewSet,
     AnalyticsSitesViewSet,
     AnalyticsPageViewsViewSet,
+    ExportAnalyticsView,
     MultilingualSummaryView,
     TenantSummaryView,
     TenantMembersView,
@@ -80,4 +81,6 @@ urlpatterns = [
     # Tenants
     path('tenants/summary/', TenantSummaryView.as_view(), name='tenants-summary'),
     path('tenants/<int:tenant_id>/members/', TenantMembersView.as_view(), name='tenant-members'),
+    # Analytics export
+    path('analytics/export/', ExportAnalyticsView.as_view(), name='analytics-export'),
 ]

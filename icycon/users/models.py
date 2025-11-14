@@ -18,6 +18,8 @@ class User(AbstractUser):
     plan = models.CharField(max_length=50, default="free")
     brand_tone = models.TextField(blank=True, null=True)
     organization_created_at = models.DateTimeField(null=True, blank=True)
+    # Avatar URL for profile pictures
+    avatar_url = models.CharField(max_length=500, blank=True, null=True)
     
     # User role within their organization
     ROLE_CHOICES = [

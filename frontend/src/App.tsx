@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import LandingPage from './pages/landing/LandingPage';
@@ -15,11 +15,19 @@ import EmailPage from './pages/EmailPage';
 import ProfilePage from './pages/ProfilePage';
 import TenantIntegrationsPage from './pages/TenantIntegrationsPage';
 
-// Wrapper component that uses useNavigate inside router context
-const AppContent: React.FC = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
 
+const AppRoutes: React.FC = () => {
+  const { user, isLoading } = useAuth();
+  const navigate = useNavigate();
+  
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-slate-900">
+        <div className="text-white text-lg">Loading...</div>
+      </div>
+    );
+  }
+  
   return (
     <Routes>
       <Route path="/" element={<LandingPage onNavigateToLogin={() => navigate('/login')} onNavigateToSignup={() => navigate('/signup')} />} />
@@ -45,7 +53,7 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <BrowserRouter>
-      <AppContent />
+      <AppRoutes />
     </BrowserRouter>
   );
 };

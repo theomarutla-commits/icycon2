@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api/auth';
+import CreateEmailTemplateModal from './email/CreateEmailTemplateModal';
 
 const EmailPage: React.FC = () => {
   const [lists, setLists] = useState<any[]>([]);
@@ -9,38 +10,49 @@ const EmailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'lists'|'templates'|'contacts'|'sends'>('lists');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  const fetchEmailData = async () => {
+    try {
+      setLoading(true);
+      const [listsData, templatesData, contactsData, sendsData] = await Promise.all([
+        api.getEmailLists(),
+        api.getEmailTemplates(),
+        api.getEmailContacts(),
+        api.getEmailSends(),
+      ]);
+
+      setLists(Array.isArray(listsData) ? listsData : listsData.results || []);
+      setTemplates(Array.isArray(templatesData) ? templatesData : templatesData.results || []);
+      setContacts(Array.isArray(contactsData) ? contactsData : contactsData.results || []);
+      setSends(Array.isArray(sendsData) ? sendsData : sendsData.results || []);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load email data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchEmailData = async () => {
-      try {
-        setLoading(true);
-        const [listsData, templatesData, contactsData, sendsData] = await Promise.all([
-          api.getEmailLists(),
-          api.getEmailTemplates(),
-          api.getEmailContacts(),
-          api.getEmailSends(),
-        ]);
-
-        setLists(Array.isArray(listsData) ? listsData : listsData.results || []);
-        setTemplates(Array.isArray(templatesData) ? templatesData : templatesData.results || []);
-        setContacts(Array.isArray(contactsData) ? contactsData : contactsData.results || []);
-        setSends(Array.isArray(sendsData) ? sendsData : sendsData.results || []);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load email data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchEmailData();
   }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 to-purple-900 p-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-white mb-2">Email Marketing</h1>
-        <p className="text-indigo-200 mb-8">Manage mailing lists, templates, and campaigns.</p>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">Email Marketing</h1>
+            <p className="text-indigo-200">Manage mailing lists, templates, and campaigns.</p>
+          </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="bg-white text-indigo-900 px-6 py-2 rounded-lg font-semibold hover:bg-indigo-100 transition"
+          >
+            + New Template
+          </button>
+        </div>
 
         {loading && <div className="text-white">Loading email data...</div>}
         {error && <div className="bg-red-500 text-white p-4 rounded">{error}</div>}
@@ -86,9 +98,14 @@ const EmailPage: React.FC = () => {
                   </div>
                 </div>
 
-                <button className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition">
-                  Manage List
-                </button>
+                <div className="flex gap-2">
+                  <button className="flex-1 bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition">
+                    Manage List
+                  </button>
+                  <button className="flex-1 bg-gray-600 text-white py-2 rounded hover:bg-gray-700 transition">
+                    Edit
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -127,9 +144,24 @@ const EmailPage: React.FC = () => {
                   <button className="flex-1 bg-gray-300 text-gray-800 py-2 rounded hover:bg-gray-400 transition">
                     Preview
                   </button>
+                  <button className="flex-1 bg-red-600 text-white py-2 rounded hover:bg-red-700 transition">
+                    Delete
+                  </button>
                 </div>
               </div>
             ))}
+
+            {templates.length === 0 && !loading && (
+              <div className="bg-white rounded-lg shadow p-8 text-center">
+                <p className="text-gray-600 text-lg mb-4">No templates found.</p>
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition"
+                >
+                  + Create Your First Template
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -147,36 +179,95 @@ const EmailPage: React.FC = () => {
 
         {/* Contacts Tab */}
         {activeTab === 'contacts' && (
-          <div className="space-y-4">
-            {contacts.map((c) => (
-              <div key={c.id} className="bg-white rounded-lg shadow p-4">
-                <div className="flex justify-between">
-                  <div>
-                    <h4 className="font-bold">{c.name || c.email}</h4>
-                    <p className="text-sm text-gray-600">{c.email}</p>
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Manage Contacts</h3>
+              <div className="grid gap-4">
+                {contacts.map((c) => (
+                  <div key={c.id} className="border border-gray-200 rounded p-4 flex justify-between items-center hover:bg-gray-50 transition">
+                    <div>
+                      <p className="font-semibold text-gray-800">{c.name || c.email}</p>
+                      <p className="text-sm text-gray-600">{c.email}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Status: <span className={c.subscribed ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
+                          {c.subscribed ? 'Subscribed' : 'Unsubscribed'}
+                        </span>
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition">
+                        Edit
+                      </button>
+                      <button className="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700 transition">
+                        Remove
+                      </button>
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-500">Subscribed: {c.subscribed ? 'Yes' : 'No'}</div>
-                </div>
+                ))}
               </div>
-            ))}
+
+              {contacts.length === 0 && !loading && (
+                <div className="text-center py-8">
+                  <p className="text-gray-600 mb-4">No contacts yet.</p>
+                  <button className="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition">
+                    + Import Contacts
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {/* Sends Tab */}
         {activeTab === 'sends' && (
-          <div className="space-y-4">
-            {sends.map((s) => (
-              <div key={s.id} className="bg-white rounded-lg shadow p-4">
-                <div className="flex justify-between">
-                  <div>
-                    <h4 className="font-bold">{s.template_name || 'Email'}</h4>
-                    <p className="text-sm text-gray-600">To: {s.recipient_email}</p>
-                  </div>
-                  <div className="text-sm text-gray-500">{s.status}</div>
-                </div>
-                <div className="text-xs text-gray-500 mt-2">Sent: {s.sent_at ? new Date(s.sent_at).toLocaleString() : 'N/A'}</div>
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Email Send History</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-100 border-b-2 border-gray-200">
+                    <tr>
+                      <th className="px-4 py-3 text-left font-semibold text-gray-800">Template</th>
+                      <th className="px-4 py-3 text-left font-semibold text-gray-800">Recipient</th>
+                      <th className="px-4 py-3 text-left font-semibold text-gray-800">Status</th>
+                      <th className="px-4 py-3 text-left font-semibold text-gray-800">Sent Date</th>
+                      <th className="px-4 py-3 text-left font-semibold text-gray-800">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sends.map((s) => (
+                      <tr key={s.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
+                        <td className="px-4 py-3 text-gray-800 font-medium">{s.template_name || 'Email'}</td>
+                        <td className="px-4 py-3 text-gray-700">{s.recipient_email}</td>
+                        <td className="px-4 py-3">
+                          <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                            s.status === 'sent' ? 'bg-green-100 text-green-800' :
+                            s.status === 'failed' ? 'bg-red-100 text-red-800' :
+                            'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {s.status?.charAt(0).toUpperCase() + s.status?.slice(1) || 'Pending'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-gray-600 text-sm">
+                          {s.sent_at ? new Date(s.sent_at).toLocaleString() : 'N/A'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <button className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition">
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            ))}
+
+              {sends.length === 0 && !loading && (
+                <div className="text-center py-8">
+                  <p className="text-gray-600">No sends yet.</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
