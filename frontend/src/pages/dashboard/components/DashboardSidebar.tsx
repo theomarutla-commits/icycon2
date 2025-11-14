@@ -18,6 +18,9 @@ const DashboardSidebar: FC<{ activeView: AppView; onNavigate: (view: AppView) =>
         <nav className="flex flex-col gap-2">
             <NavItem icon={<DashboardIcon />} label="Dashboard" active={activeView === 'dashboard'} onClick={() => onNavigate('dashboard')} />
             <NavItem icon={<SeoIcon />} label="SEO Tools" active={activeView === 'seo'} onClick={() => onNavigate('seo')} />
+            <NavItem icon={<SocialIcon />} label="ASO" active={activeView === 'aso'} onClick={() => onNavigate('aso')} />
+            <NavItem icon={<SeoIcon />} label="Marketplace" active={activeView === 'marketplace'} onClick={() => onNavigate('marketplace')} />
+            <NavItem icon={<SeoIcon />} label="Analytics" active={activeView === 'analytics'} onClick={() => onNavigate('analytics')} />
             <NavItem icon={<SocialIcon />} label="Social Media" active={activeView === 'social'} onClick={() => onNavigate('social')} />
             <NavItem icon={<EmailIcon />} label="Email Engine" active={activeView === 'email'} onClick={() => onNavigate('email')} />
             <div className="my-2 border-t border-slate-700"></div>
