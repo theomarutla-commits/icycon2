@@ -355,6 +355,86 @@ export const api = {
     return response.json();
   },
 
+  getSEOContent: async () => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/api/seo/content/`, {
+      headers: {
+        'Authorization': `Token ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error('Failed to fetch SEO content');
+    return response.json();
+  },
+
+  // Create a new SEO site
+  createSEOSite: async (data: { domain: string; sitemaps_url?: string; default_locale?: string }) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/api/seo/sites/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Token ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`Failed to create SEO site: ${err}`);
+    }
+    return response.json();
+  },
+
+  getSEOSite: async (id: number) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/api/seo/sites/${id}/`, {
+      headers: {
+        'Authorization': `Token ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error('Failed to fetch SEO site');
+    return response.json();
+  },
+
+  updateSEOSite: async (id: number, data: any) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/api/seo/sites/${id}/`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Token ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`Failed to update SEO site: ${err}`);
+    }
+    return response.json();
+  },
+
+  deleteSEOSite: async (id: number) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) throw new Error('Not authenticated');
+    const response = await fetch(`${API_BASE}/api/seo/sites/${id}/`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Token ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (response.status !== 204 && !response.ok) {
+      const err = await response.text();
+      throw new Error(`Failed to delete SEO site: ${err}`);
+    }
+    return true;
+  },
+
   getUserProfile: async () => {
     const token = localStorage.getItem('authToken');
     if (!token) throw new Error('Not authenticated');

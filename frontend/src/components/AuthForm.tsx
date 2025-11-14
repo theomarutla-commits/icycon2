@@ -3,7 +3,7 @@ import React, { FC, useState, FormEvent } from 'react';
 const AuthForm: FC<{
     title: string;
     isLogin: boolean;
-    onSubmit: (email: string, pass: string) => void;
+    onSubmit: (email: string, pass: string, confirmPass?: string) => void;
     onSwitch: () => void;
     error: string | null;
     loading: boolean;
@@ -18,7 +18,7 @@ const AuthForm: FC<{
             alert("Passwords don't match!");
             return;
         }
-        onSubmit(email, password);
+        onSubmit(email, password, confirmPassword);
     };
 
     return (

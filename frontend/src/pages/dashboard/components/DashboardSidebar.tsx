@@ -1,31 +1,51 @@
 import React, { FC } from 'react';
-import { AppView } from '../../../types';
+import { NavLink } from 'react-router-dom';
 import { DashboardIcon, SeoIcon, SocialIcon, EmailIcon, SettingsIcon, LogoIcon } from '../../../components/Icons';
 
-const NavItem: FC<{ icon: React.ReactNode; label: string; active: boolean; onClick: () => void; }> = ({ icon, label, active, onClick }) => (
-    <button onClick={onClick} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${active ? 'bg-[#0052bd] text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white'}`}>
-        {icon}
-        <span>{label}</span>
-    </button>
-);
-
-const DashboardSidebar: FC<{ activeView: AppView; onNavigate: (view: AppView) => void }> = ({ activeView, onNavigate }) => (
+const DashboardSidebar: FC = () => (
     <aside className="bg-slate-800/50 border-r border-slate-700 w-64 p-4 fixed top-0 left-0 h-full hidden lg:flex flex-col">
         <div className="flex items-center gap-2 mb-8 mt-4 ml-2">
              <LogoIcon />
              <h1 className="text-xl font-bold text-white">IcyCon</h1>
         </div>
         <nav className="flex flex-col gap-2">
-            <NavItem icon={<DashboardIcon />} label="Dashboard" active={activeView === 'dashboard'} onClick={() => onNavigate('dashboard')} />
-            <NavItem icon={<SeoIcon />} label="SEO Tools" active={activeView === 'seo'} onClick={() => onNavigate('seo')} />
-            <NavItem icon={<SocialIcon />} label="ASO" active={activeView === 'aso'} onClick={() => onNavigate('aso')} />
-            <NavItem icon={<SeoIcon />} label="Marketplace" active={activeView === 'marketplace'} onClick={() => onNavigate('marketplace')} />
-            <NavItem icon={<SeoIcon />} label="Analytics" active={activeView === 'analytics'} onClick={() => onNavigate('analytics')} />
-            <NavItem icon={<SocialIcon />} label="Social Media" active={activeView === 'social'} onClick={() => onNavigate('social')} />
-            <NavItem icon={<EmailIcon />} label="Email Engine" active={activeView === 'email'} onClick={() => onNavigate('email')} />
+            <NavLink to="/app" end className={({isActive})=>`w-full flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive ? 'bg-[#0052bd] text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white'}`}>
+                <DashboardIcon />
+                <span>Dashboard</span>
+            </NavLink>
+            <NavLink to="/app/seo" className={({isActive})=>`w-full flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive ? 'bg-[#0052bd] text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white'}`}>
+                <SeoIcon />
+                <span>SEO Tools</span>
+            </NavLink>
+            <NavLink to="/app/aso" className={({isActive})=>`w-full flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive ? 'bg-[#0052bd] text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white'}`}>
+                <SocialIcon />
+                <span>ASO</span>
+            </NavLink>
+            <NavLink to="/app/marketplace" className={({isActive})=>`w-full flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive ? 'bg-[#0052bd] text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white'}`}>
+                <SeoIcon />
+                <span>Marketplace</span>
+            </NavLink>
+            <NavLink to="/app/analytics" className={({isActive})=>`w-full flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive ? 'bg-[#0052bd] text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white'}`}>
+                <SeoIcon />
+                <span>Analytics</span>
+            </NavLink>
+            <NavLink to="/app/social" className={({isActive})=>`w-full flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive ? 'bg-[#0052bd] text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white'}`}>
+                <SocialIcon />
+                <span>Social Media</span>
+            </NavLink>
+            <NavLink to="/app/email" className={({isActive})=>`w-full flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive ? 'bg-[#0052bd] text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white'}`}>
+                <EmailIcon />
+                <span>Email Engine</span>
+            </NavLink>
             <div className="my-2 border-t border-slate-700"></div>
-            <NavItem icon={<SettingsIcon />} label="Profile" active={activeView === 'profile'} onClick={() => onNavigate('profile')} />
-            <NavItem icon={<SettingsIcon />} label="Account" active={activeView === 'account'} onClick={() => onNavigate('account')} />
+            <NavLink to="/app/profile" className={({isActive})=>`w-full flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive ? 'bg-[#0052bd] text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white'}`}>
+                <SettingsIcon />
+                <span>Profile</span>
+            </NavLink>
+            <NavLink to="/app/account" className={({isActive})=>`w-full flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive ? 'bg-[#0052bd] text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white'}`}>
+                <SettingsIcon />
+                <span>Account</span>
+            </NavLink>
         </nav>
     </aside>
 );

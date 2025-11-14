@@ -9,14 +9,14 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 
-from analytics.models import Site, KeywordCluster, ContentItem, FAQ, PageView
+from analytics.models import Site as AnalyticsSite, KeywordCluster as AnalyticsKeywordCluster, ContentItem as AnalyticsContentItem, FAQ as AnalyticsFAQ, PageView
 from aso.models import App as ASOApp, AppKeyword, AppListing
 from marketplace.models import (
     Product, Review, Order, SavedProduct,
     Conversation as MarketplaceConversation,
     Message as MarketplaceMessage
 )
-from tenants.models import Tenant
+from tenants.models import Tenant, TenantUser
 from seo.models import Site as SEOSite, KeywordCluster as SEOKeywordCluster, ContentItem as SEOContentItem, FAQ as SEOFAQ
 from social_media.models import (
     SocialAccount, Post, Comment, Engagement,
@@ -24,6 +24,15 @@ from social_media.models import (
     Message as SocialMessage
 )
 from email_engine.models import EmailList, Contact, EmailTemplate, EmailFlow, EmailSend
+
+
+# ============================================================================
+# Helper Functions
+# ============================================================================
+
+def get_user_tenants(user):
+    """Get all tenants the user has access to."""
+    return Tenant.objects.filter(tenantuser__user=user)
 
 
 # ============================================================================
@@ -73,7 +82,7 @@ class ASOAppViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return ASOApp.objects.filter(tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -139,7 +148,7 @@ class MarketplaceProductViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return Product.objects.filter(tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -207,8 +216,8 @@ class AnalyticsSitesViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
-        return Site.objects.filter(tenant__in=tenants)
+        tenants = get_user_tenants(user)
+        return AnalyticsSite.objects.filter(tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
         sites = self.get_queryset()
@@ -260,7 +269,7 @@ class MultilingualSummaryView(generics.GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         user = request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         
         # Count locales across all content
         content_items = ContentItem.objects.filter(tenant__in=tenants)
@@ -291,7 +300,7 @@ class TenantSummaryView(generics.GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         user = request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         
         return Response({
             "tenants": [
@@ -345,7 +354,7 @@ class SEOSitesViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return SEOSite.objects.filter(tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -382,7 +391,7 @@ class SEOKeywordClustersViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return SEOKeywordCluster.objects.filter(tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -406,7 +415,7 @@ class SEOContentItemsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return SEOContentItem.objects.filter(tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -427,7 +436,7 @@ class SEOFAQsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return SEOFAQ.objects.filter(tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -450,7 +459,7 @@ class SocialAccountsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return SocialAccount.objects.filter(tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -472,7 +481,7 @@ class SocialPostsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return Post.objects.filter(tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -496,7 +505,7 @@ class SocialConversationsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return SocialConversation.objects.filter(account__tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -520,7 +529,7 @@ class EmailListsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return EmailList.objects.filter(tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -542,7 +551,7 @@ class EmailTemplatesViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return EmailTemplate.objects.filter(tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -563,7 +572,7 @@ class EmailFlowsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return EmailFlow.objects.filter(tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -587,7 +596,7 @@ class MarketplaceReviewsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return Review.objects.filter(tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -632,7 +641,7 @@ class MarketplaceOrdersViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return Order.objects.filter(buyer__in=tenants) | Order.objects.filter(seller__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -660,7 +669,7 @@ class MarketplaceSavedProductsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return SavedProduct.objects.filter(tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -687,7 +696,7 @@ class ASOKeywordsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return AppKeyword.objects.filter(app__tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -709,7 +718,7 @@ class ASOListingsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return AppListing.objects.filter(app__tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -735,7 +744,7 @@ class EmailContactsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return Contact.objects.filter(tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -756,7 +765,7 @@ class EmailSendsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return EmailSend.objects.filter(tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -783,7 +792,7 @@ class SocialCommentsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return Comment.objects.filter(post__tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -805,7 +814,7 @@ class SocialEngagementViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return Engagement.objects.filter(post__tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -835,7 +844,7 @@ class AnalyticsPageViewsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return PageView.objects.filter(site__tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -862,7 +871,7 @@ class TenantIntegrationsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         from tenants.models import Integration
         return Integration.objects.filter(tenant__in=tenants)
 
@@ -887,7 +896,7 @@ class MarketplaceConversationsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return MarketplaceConversation.objects.filter(tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -909,7 +918,7 @@ class MarketplaceMessagesViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return MarketplaceMessage.objects.filter(conversation__tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
@@ -934,7 +943,7 @@ class SocialMessagesViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        tenants = Tenant.objects.filter(user=user)
+        tenants = get_user_tenants(user)
         return SocialMessage.objects.filter(conversation__account__tenant__in=tenants)
 
     def list(self, request, *args, **kwargs):
