@@ -5,6 +5,13 @@ import { AppView } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import PlaceholderView from './views/PlaceholderView';
 import SeoOptimisationView from './views/SeoOptimisationView';
+import ASOPage from '../ASOPage';
+import MarketplacePage from '../MarketplacePage';
+import AnalyticsPage from '../AnalyticsPage';
+import SocialPage from '../SocialPage';
+import EmailPage from '../EmailPage';
+import SEOPage from '../SEOPage';
+import TenantIntegrationsPage from '../TenantIntegrationsPage';
 
 
 const DashboardPage: FC = () => {
@@ -20,15 +27,21 @@ const DashboardPage: FC = () => {
                     <p className="text-slate-400 mt-2">This will be your central hub for project overviews and key metrics.</p>
                 </PlaceholderView>
             case 'seo':
-                return <SeoOptimisationView />
+                return <SEOPage />
+            case 'aso':
+                return <ASOPage />
+            case 'marketplace':
+                return <MarketplacePage />
+            case 'analytics':
+                return <AnalyticsPage />
             case 'social':
-                return <PlaceholderView title="Social Media" subtitle="Connect accounts and schedule posts." />
+                return <SocialPage />
             case 'email':
-                return <PlaceholderView title="Email Engine" subtitle="Design templates and manage campaigns." />
+                return <EmailPage />
             case 'profile':
                 return <PlaceholderView title="User Profile" subtitle="Update your personal information." />
             case 'account':
-                return <PlaceholderView title="Account & Billing" subtitle="Manage your subscription and payment details." />
+                return <TenantIntegrationsPage />
             default:
                 return <div>Not Found</div>
         }

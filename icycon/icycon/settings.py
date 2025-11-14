@@ -122,6 +122,11 @@ LOGIN_URL = '/login/'  # URL to redirect to when login is required
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = DEBUG  # Only True in development
 CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1:3000',
+    'http://localhost:3000',
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+] + [
     origin.strip() 
     for origin in os.getenv('CORS_ALLOWED_ORIGINS', '').split(',') 
     if origin.strip()

@@ -15,20 +15,15 @@ urlpatterns = [
     path('social-media/', include('social_media.urls')),
     path('tenants/', include('tenants.urls')),
     path('api/chat/', include('chatbot.urls')),
-    # Simple server-rendered pages to replace the React frontend during development
+    
+    # New unified API endpoints for React frontend (replaces template views)
+    path('api/', include('icycon.api_urls')),
+    
     # Serve React SPA from root (built into static/frontend/index.html). If
     # the frontend hasn't been built yet this will fall back to the server-
     # rendered `home.html` template.
     path('', serve_react_frontend, name='home'),
-    path('tenants-ui/', TemplateView.as_view(template_name='tenants.html'), name='tenants_ui'),
-    path('signup/', TemplateView.as_view(template_name='signup.html'), name='signup'),
-    # App overview pages (server-rendered)
-    path('aso-ui/', TemplateView.as_view(template_name='aso.html'), name='aso_ui'),
-    path('marketplace-ui/', TemplateView.as_view(template_name='marketplace.html'), name='marketplace_ui'),
-    path('multilingual-ui/', TemplateView.as_view(template_name='multilingual.html'), name='multilingual_ui'),
-    path('tenants-tenants/', TemplateView.as_view(template_name='tenants_tenants.html'), name='tenants_tenants'),
-    path('tenants-tenant-users/', TemplateView.as_view(template_name='tenants_tenant_users.html'), name='tenants_tenant_users'),
-    path('tenants-integrations/', TemplateView.as_view(template_name='tenants_integrations.html'), name='tenants_integrations'),
+    
     # User management (profile, account, settings)
     path('users/', include('users.urls')),
     # Authentication
