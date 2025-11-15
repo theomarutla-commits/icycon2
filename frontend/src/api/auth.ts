@@ -5,7 +5,7 @@ export const api = {
   login: async (email: string, password: string) => {
     console.log('Logging in with:', email);
     try {
-      const response = await fetch(`${API_BASE}/users/api/auth/login`, {
+      const response = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -34,7 +34,7 @@ export const api = {
   signup: async (email: string, username: string, password: string, password_confirm: string) => {
     console.log('Signing up with:', email, username);
     try {
-      const response = await fetch(`${API_BASE}/users/api/auth/signup`, {
+      const response = await fetch(`${API_BASE}/api/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

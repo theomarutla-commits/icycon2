@@ -38,6 +38,7 @@ from .api_views import (
     EmailContactsViewSet,
     EmailSendsViewSet,
 )
+from users.auth_views import SignupView, LoginView
 
 router = DefaultRouter()
 router.register(r'aso/apps', ASOAppViewSet, basename='aso-apps')
@@ -71,7 +72,11 @@ router.register(r'tenants/integrations', TenantIntegrationsViewSet, basename='te
 urlpatterns = [
     # Router endpoints
     path('', include(router.urls)),
-    
+
+    # Authentication
+    path('auth/signup/', SignupView.as_view(), name='auth-signup'),
+    path('auth/login/', LoginView.as_view(), name='auth-login'),
+
     # Dashboard
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
     
